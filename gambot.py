@@ -28,4 +28,11 @@ async def on_message(message):
     if message.content == 'Hey Gambot':
         await message.channel.send(f'Hey {message.author.display_name} :)')
 
+    await bot.process_commands(message)
+
+@bot.command(name='github')
+async def github(ctx):
+    print('user asked for github')
+    await ctx.send('https://github.com/dlarocque/Gambot')
+
 bot.run(TOKEN)
