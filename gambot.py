@@ -9,7 +9,8 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-bot = commands.Bot(command_prefix = '!')
+bot = commands.Bot(command_prefix='!')
+
 
 @bot.event
 async def on_ready():
@@ -18,6 +19,7 @@ async def on_ready():
 
     for guild in bot.guilds:
         print(guild.name)
+
 
 @bot.event
 async def on_message(message):
@@ -31,20 +33,10 @@ async def on_message(message):
     # bot commands from being read in, so we do this to prevent that.
     await bot.process_commands(message)
 
+
 @bot.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
 async def github(ctx):
     await ctx.send('https://github.com/dlarocque/Gambot')
 
-@bot.command(name='points')
-async def points(ctx):
-    # todo
 
-@bot.command(name='deathroll')
-async def deathroll(ctx, bet, opponent):
-    await ctx.send(f'{ctx.author.display_name} has started a deathroll with @{opponent.display_name}')
-    # todo
-
-@bot.command(name='roll')
-async def roll(ctx, bet):
-    # todo
 bot.run(TOKEN)
