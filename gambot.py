@@ -9,7 +9,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix = '!')
 
 @bot.event
 async def on_ready():
@@ -21,7 +21,6 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-
     if message.author == bot.user:
         return
 
@@ -34,7 +33,6 @@ async def on_message(message):
 
 @bot.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
 async def github(ctx):
-    print('user asked for github')
     await ctx.send('https://github.com/dlarocque/Gambot')
 
 @bot.command(name='points')
