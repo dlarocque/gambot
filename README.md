@@ -4,6 +4,9 @@ The points that members earn through their interactions with others can then be 
 
 In the future, players will be able to spend their points on items and roles!
 
+# Contributing
+**I have no idea what I'm doing with Python and databases, please help my code not suck** 
+
 ## Commands
 
 `!help` lists all commands along with their descriptions
