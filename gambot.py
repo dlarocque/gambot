@@ -1,15 +1,35 @@
 # gambot.py
 import os
 
+# Discord imports
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+
+# Database imports
+import psycopg2
+
+# Connect to database
+
+PSQL_PASS = os.getenv('PSQL_PASS')
+try:
+    connection = psycopg2.connect (
+        user = 'postgres',
+        password = PSQL_PASS,
+        host = 'localhost',
+        port = '5432',
+        database = 'postgres'
+    )
+except(Exception, psycopg2.error) as error:
+        print("Error connecting to database")
+
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix=';')
+
 
 @bot.event
 async def on_ready():
@@ -19,9 +39,9 @@ async def on_ready():
     for guild in bot.guilds:
         print(guild.name)
 
+
 @bot.event
 async def on_message(message):
-
     if message.author == bot.user:
         return
 
@@ -32,21 +52,10 @@ async def on_message(message):
     # bot commands from being read in, so we do this to prevent that.
     await bot.process_commands(message)
 
+
 @bot.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
 async def github(ctx):
-    print('user asked for github')
     await ctx.send('https://github.com/dlarocque/Gambot')
 
-@bot.command(name='points')
-async def points(ctx):
-    # todo
 
-@bot.command(name='deathroll')
-async def deathroll(ctx, bet, opponent):
-    await ctx.send(f'{ctx.author.display_name} has started a deathroll with @{opponent.display_name}')
-    # todo
-
-@bot.command(name='roll')
-async def roll(ctx, bet):
-    # todo
 bot.run(TOKEN)
