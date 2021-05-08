@@ -15,19 +15,34 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 PSQL_PASS = os.getenv('PSQL_PASS')
 
-# Connect to database
-try:
-    connection = psycopg2.connect (
+# Set command Prefix
+bot = commands.Bot(command_prefix=';')
+
+# Connect to PostgreSQL database
+def connect():
+    try:
+        print('Connecting to the PostgreSQL database...')
+        connection = psycopg2.connect (
         user = 'postgres',
         password = PSQL_PASS,
         host = 'localhost',
         port = '5432',
         database = 'postgres'
-    )
-except(Exception, psycopg2.error) as error:
-        print("Error connecting to database")
+        )
 
-bot = commands.Bot(command_prefix=';')
+        cur = connection.cursor()
+
+        print('PostgreSQL version: ')
+        cur.execute('SELECT version()')
+        print(cur.fetchone())
+
+        # When should we close the connection to the database?
+
+    except(Exception, psycopg2.error) as error:
+        print(error)
+    finally:
+        if connection is not None:
+            print('Successfully connected to PostgreSQL database.\n')
 
 
 @bot.event
@@ -57,4 +72,8 @@ async def github(ctx):
     await ctx.send('https://github.com/dlarocque/Gambot')
 
 
-bot.run(TOKEN)
+# This might be unecessary, but whatever
+if __name__ == '__main__':
+    connect()
+    print('Connecting Gambot to Discord...')
+    bot.run(TOKEN)
