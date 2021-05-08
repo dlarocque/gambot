@@ -9,9 +9,13 @@ from discord.ext import commands
 # Database imports
 import psycopg2
 
-# Connect to database
-
+# Load from environment
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
 PSQL_PASS = os.getenv('PSQL_PASS')
+
+# Connect to database
 try:
     connection = psycopg2.connect (
         user = 'postgres',
@@ -22,11 +26,6 @@ try:
     )
 except(Exception, psycopg2.error) as error:
         print("Error connecting to database")
-
-
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
 
 bot = commands.Bot(command_prefix=';')
 
