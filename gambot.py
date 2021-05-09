@@ -45,6 +45,7 @@ def connect():
             print('Successfully connected to PostgreSQL database.\n')
 
 
+
 @bot.event
 async def on_ready():
     print('Gambot is connected to Discord.')
