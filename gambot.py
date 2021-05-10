@@ -76,7 +76,7 @@ def collect_data():
                            ''', [member.id])
             # If the user does not exist in the gambot.users table
             if(cursor.fetchone() is None):
-                print(member.id, guild.name, member.display_name, member.discriminator)
+                print(f'Collecting data for new user: {member.display_name}')
                 cursor.execute('''
                                 INSERT INTO gambot.users
                                 (user_id, discriminator, guild_name,
@@ -85,16 +85,37 @@ def collect_data():
                                ''',
                                (member.id, member.discriminator, guild.name,
                                 member.display_name))
+                cursor.execute('''
+                               INSERT INTO gambot.gold
+                               (user_id, gold)
+                               VALUES (%s, %s)
+                               ''',
+                               (member.id, 0))
 
-    connection.commit()
+    connection.commit() # Commit changes to database
     print('Done collecting user data.\n')
 
 
+# Called when a message is sent in a guild the bot is connected to
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
+    global connection
+    global cursor
+
+    # Do not respond to bots
+    if message.author.bot:
         return
 
+    # Update the authors gold
+    cursor.execute('''
+                   UPDATE gambot.gold
+                   SET gold = gold + 1
+                   WHERE user_id = %s
+                   ''', [message.author.id])
+    print(f'Increased {message.author.id} gold.')
+    connection.commit() # Commit changes to gambot.gold
+
+    # Unique message response
     if message.content == 'Hey Gambot':
         await message.channel.send(f'Hey {message.author.display_name} :)')
 
