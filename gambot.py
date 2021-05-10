@@ -73,10 +73,19 @@ def collect_data():
                            SELECT user_id FROM gambot.users
                            WHERE user_id = %s;
                            ''', [member.id])
-            output = cursor.fetchone()
-            if(output is None):
-                print(member.id)
-#    connection.commit()
+            # If the user does not exist in the gambot.users table
+            if(cursor.fetchone() is None):
+                print(member.id, guild.name, member.display_name, member.discriminator)
+                cursor.execute('''
+                                INSERT INTO gambot.users
+                                (user_id, discriminator, guild_name,
+                                display_name)
+                                VALUES (%s, %s, %s, %s)
+                               ''',
+                               (member.id, member.discriminator, guild.name,
+                                member.display_name))
+
+    connection.commit()
     print('Done collecting user data.\n')
 
 
