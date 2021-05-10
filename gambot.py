@@ -75,7 +75,7 @@ def collect_data():
                            ''', [member.id])
             # If the user does not exist in the gambot.users table
             if(cursor.fetchone() is None):
-                print(member.id, guild.name, member.display_name, member.discriminator)
+                print(f'Collecting data for new user: {member.display_name}')
                 cursor.execute('''
                                 INSERT INTO gambot.users
                                 (user_id, discriminator, guild_name,
@@ -84,8 +84,14 @@ def collect_data():
                                ''',
                                (member.id, member.discriminator, guild.name,
                                 member.display_name))
+                cursor.execute('''
+                               INSERT INTO gambot.gold
+                               (user_id, gold)
+                               VALUES (%s, %s)
+                               ''',
+                               (member.id, 0))
 
-    connection.commit()
+    connection.commit() # Commit changes to gambot.users
     print('Done collecting user data.\n')
 
 
