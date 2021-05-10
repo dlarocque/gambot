@@ -97,7 +97,7 @@ def collect_data():
 
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
+    if message.author.bot:
         return
 
     if message.content == 'Hey Gambot':
