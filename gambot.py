@@ -91,26 +91,30 @@ def collect_data():
                                ''',
                                (member.id, 0))
 
-    connection.commit() # Commit changes to gambot.users
+    connection.commit() # Commit changes to database
     print('Done collecting user data.\n')
 
 
+# Called when a message is sent in a guild the bot is connected to
 @bot.event
 async def on_message(message):
+    global connection
+    global cursor
+
+    # Do not respond to bots
     if message.author.bot:
         return
 
-    global cursor
-    global connection
-
+    # Update the authors gold
     cursor.execute('''
                    UPDATE gambot.gold
                    SET gold = gold + 1
                    WHERE user_id = %s
                    ''', [message.author.id])
     print(f'Increased {message.author.id} gold.')
-    connection.commit()
+    connection.commit() # Commit changes to gambot.gold
 
+    # Unique message response
     if message.content == 'Hey Gambot':
         await message.channel.send(f'Hey {message.author.display_name} :)')
 
