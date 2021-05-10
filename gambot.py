@@ -3,8 +3,9 @@ import os
 
 # Discord imports
 import discord
-from dotenv import load_dotenv
 from discord.ext import commands
+
+from dotenv import load_dotenv
 
 # Database imports
 import psycopg2
@@ -16,10 +17,17 @@ GUILD = os.getenv('DISCORD_GUILD')
 PSQL_PASS = os.getenv('PSQL_PASS')
 
 # Set command Prefix
-bot = commands.Bot(command_prefix=';')
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=';', intents=intents)
+
+connection = None
+cursor = None
 
 # Connect to PostgreSQL database
 def connect():
+    global cursor
+    global connection
+
     try:
         print('Connecting to the PostgreSQL database...')
         connection = psycopg2.connect (
@@ -30,19 +38,16 @@ def connect():
         database = 'postgres'
         )
 
-        cur = connection.cursor()
-
-        print('PostgreSQL version: ')
-        cur.execute('SELECT version()')
-        print(cur.fetchone())
-
-        # When should we close the connection to the database?
-
+        cursor = connection.cursor()
     except(Exception, psycopg2.error) as error:
         print(error)
     finally:
         if connection is not None:
             print('Successfully connected to PostgreSQL database.\n')
+            print('PostgreSQL version: ')
+            cursor.execute('SELECT version()')
+            print(cursor.fetchone())
+            print() # :)
 
 
 @bot.event
@@ -52,6 +57,27 @@ async def on_ready():
 
     for guild in bot.guilds:
         print(guild.name)
+
+    collect_data()
+
+# Collect the data from all of the users
+def collect_data():
+    global cursor
+    global connection
+
+    print('\nCollecting user data in guilds...')
+
+    for guild in bot.guilds:
+        for member in guild.members:
+            cursor.execute('''
+                           SELECT user_id FROM gambot.users
+                           WHERE user_id = %s;
+                           ''', [member.id])
+            output = cursor.fetchone()
+            if(output is None):
+                print(member.id)
+#    connection.commit()
+    print('Done collecting user data.\n')
 
 
 @bot.event
