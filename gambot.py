@@ -100,6 +100,17 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    global cursor
+    global connection
+
+    cursor.execute('''
+                   UPDATE gambot.gold
+                   SET gold = gold + 1
+                   WHERE user_id = %s
+                   ''', [message.author.id])
+    print(f'Increased {message.author.id} gold.')
+    connection.commit()
+
     if message.content == 'Hey Gambot':
         await message.channel.send(f'Hey {message.author.display_name} :)')
 
