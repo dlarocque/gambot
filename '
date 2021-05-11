@@ -1,6 +1,4 @@
 # gambot.py
-# IMPORTS
-
 import os
 
 # Discord imports
@@ -12,24 +10,18 @@ from dotenv import load_dotenv
 # Database imports
 import psycopg2
 
-# GLOBAL VARIABLES
-
-# Environment variables
+# Load from environment
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 PSQL_PASS = os.getenv('PSQL_PASS')
 
-# Discord bot variables
+# Set command Prefix
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='$', intents=intents)
 
-# PostgreSQL database variables
-connection = None # Connection to database
-cursor = None     # Cursor in connection
-
-deathroll_games = {} # Dictionary of deathroll games in progress,
-# key = user_id, value = Deathroll_game
+connection = None
+cursor = None
 
 # Connect to PostgreSQL database
 def connect():
@@ -125,11 +117,11 @@ async def on_message(message):
 
 
 class Deathroll:
-    player_1 = None
-    player_2 = None
-    bet = 0 # The amount of gold that was bet on the game
-    channel = None # The channel that the game is being played in
-    turn = None # 1 if player_1's turn, 2 if player_2's turn
+    player_1 = -1
+    player_2 = -1
+    bet = 0
+    channel
+    turn
 
 
 @bot.command(name='deathroll')
@@ -147,8 +139,6 @@ async def deathroll(ctx):
     Keyword arguments:
     ctx: context that the command was written in
     """
-    global deathroll_games
-
     output = 'Starting a deathroll match.\n'
 
     await ctx.send(output)
