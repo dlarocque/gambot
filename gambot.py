@@ -18,7 +18,7 @@ PSQL_PASS = os.getenv('PSQL_PASS')
 
 # Set command Prefix
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=';', intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 connection = None
 cursor = None
@@ -105,14 +105,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # Update the authors gold
-    cursor.execute('''
-                   UPDATE gambot.gold
-                   SET gold = gold + 1
-                   WHERE user_id = %s
-                   ''', [message.author.id])
-    print(f'Increased {message.author.id} gold.')
-    connection.commit() # Commit changes to gambot.gold
+    update_gold(message.author.id, 1)
 
     # Unique message response
     if message.content == 'Hey Gambot':
@@ -123,9 +116,63 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
+@bot.command(name='deathroll')
+async def deathroll(ctx):
+    """Start a deathroll game between two players
+
+    Starts a deathroll game between two players if the conditions
+    for starting a deathroll game are met.
+    ** See README.md for more information on the rules of the game **
+
+    Conditions for a deathroll game:
+    1. Players must not be in an existing deathroll game.
+    2. Both players must have enough gold to satisfy the wager.
+
+    Keyword arguments:
+    ctx: context that the command was written in
+    """
+    output = 'Starting a deathroll match.\n'
+
+    await ctx.send(output)
+
+
+@bot.command(name='roll')
+async def roll(ctx):
+    """Rolls for a player once it is their turn
+
+    Once a deathroll game is started between two players, both players
+    have to alternate turns by executing this command to play their turn.
+    The roll is from 0 to game.prev_roll.
+
+    Conditions for a roll:
+    1. The member exeucting the command must be in a deathroll game.
+    2. The roll command must be executed from the same channel that
+    the deathroll game was started in.
+
+    Keyword arguments:
+    ctx: context that the command was written in
+    """
+    output = 'temp'
+
+
+    await ctx.send(output)
+
+
 @bot.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
 async def github(ctx):
     await ctx.send('https://github.com/dlarocque/Gambot')
+
+
+def update_gold(user_id, to_add):
+    global cursor
+    global connection
+
+    cursor.execute('''
+                   UPDATE gambot.gold
+                   SET gold = gold + %s
+                   WHERE user_id = %s
+                   ''', (to_add, user_id))
+    connection.commit() # Commit changes to gambot.gold
 
 
 # This might be unecessary, but whatever
