@@ -127,6 +127,20 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
+@bot.command(name='gold')
+async def deathroll_start(ctx):
+    """Tells the user how much gold they have
+    """
+    global cursor
+    
+    cursor.execute('''
+                    SELECT gold from gambot.gold
+                    WHERE user_id = %s
+                    ''', (ctx.message.author.id, ))
+    gold = cursor.fetchone()[0]
+    await ctx.send(f'{ctx.message.author.display_name} has {gold} gold.')
+
+
 @bot.command(name='deathroll_start')
 async def deathroll_start(ctx, opponent: discord.User, bet: int):
     """Start a deathroll game between two players
