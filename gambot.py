@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 # Database imports
 import psycopg2
 
+import deathroll
+
 # GLOBAL VARIABLES
 
 # Environment variables
@@ -67,6 +69,7 @@ async def on_ready():
         print(guild.name)
 
     collect_data()
+
 
 # Collect the data from all of the users
 def collect_data():
@@ -124,21 +127,12 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-class Deathroll:
-    player_1 = None
-    player_2 = None
-    bet = 0 # The amount of gold that was bet on the game
-    channel = None # The channel that the game is being played in
-    turn = None # 1 if player_1's turn, 2 if player_2's turn
-
-
-@bot.command(name='deathroll')
-async def deathroll(ctx):
+@bot.command(name='deathroll_start')
+async def deathroll_start(ctx, opponent: discord.User, bet: int):
     """Start a deathroll game between two players
 
     Starts a deathroll game between two players if the conditions
     for starting a deathroll game are met.
-    ** See README.md for more information on the rules of the game **
 
     Conditions for a deathroll game:
     1. Players must not be in an existing deathroll game.
@@ -149,13 +143,33 @@ async def deathroll(ctx):
     """
     global deathroll_games
 
-    output = 'Starting a deathroll match.\n'
+    # Check to see if one of the users is already in a deathroll game
+    if(deathroll_game_with(ctx.message.author.id) is not None):
+        message = '{message.author.display_name} is already in a game.'
+    elif(deathroll_game_with(opponent.id) is not None):
+        message = '{opponent.display_name} is already in a game.'
+    else:
+        # Check to see if the users have enough gold to play a game
+        if(get_gold(ctx.message.author.id) < bet):
+            message = '{message.author.display_name} does not have nough gold.'
+        elif(get_gold(opponent.id) < bet):
+            message = '{opponent.id} does not have enough gold.'
+        else:
+            deathroll_games.push(deathroll.Game(ctx.msessage.author.id, opponent.id, bet))
+            message = '''
+                        Deathroll game has begun.\n
+                        Players:\n
+                        @%s\n
+                        @%s\n
+                        \n
+                        Bet: %d\n
+                        \n
+                        @%s may now `$deathroll`.
+                        '''
+    await ctx.send(message)
 
-    await ctx.send(output)
-
-
-@bot.command(name='roll')
-async def roll(ctx):
+@bot.command(name='deathroll')
+async def deathroll(ctx):
     """Rolls for a player once it is their turn
 
     Once a deathroll game is started between two players, both players
@@ -176,6 +190,30 @@ async def roll(ctx):
     await ctx.send(output)
 
 
+@bot.command(name='deathroll_abandoned')
+async def deathroll(ctx, oppenent):
+    """Checks to see if an opponent has abandonded a game
+
+    If the opponent has indeed abandoned the game, then the
+    player who that player was oppposing automatically wins the
+    deathroll game.
+    """
+
+
+def deathroll_win(winner, gold):
+    """Rewards the winner of a deathroll game
+
+    """
+
+
+def deathroll_game_with(id):
+    for deathroll_game in deathroll_games:
+        if(deathroll_game.p1_id == id or deathroll_game.p2_id == id):
+            return deathroll_game
+
+    return None
+
+
 @bot.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
 async def github(ctx):
     await ctx.send('https://github.com/dlarocque/Gambot')
@@ -186,11 +224,26 @@ def update_gold(user_id, to_add):
     global connection
 
     cursor.execute('''
-                   UPDATE gambot.gold
-                   SET gold = gold + %s
-                   WHERE user_id = %s
+                    UPDATE gambot.gold
+                    SET gold = gold + %s
+                    WHERE user_id = %s
                    ''', (to_add, user_id))
     connection.commit() # Commit changes to gambot.gold
+
+
+def get_gold(user_id):
+    global cursor
+
+    cursor.execute('''
+                    SELECT gold FROM gambot.gold
+                    WHERE user_id = %s
+                    ''', (user_id, ))
+    output = cursor.fetchone() # returns a tuple if the user exists
+    if(output is not None):
+        gold = output[0]
+        return gold
+    return None
+    
 
 
 # This might be unecessary, but whatever
