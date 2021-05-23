@@ -17,3 +17,6 @@ class Game:
         self.bet = bet # Amount of gold that was bet
         self.turn = 'p1'# Whos turn it is to roll next
         self.next_roll = bet # What to roll on next turn
+
+    def __str__(self):
+        return f'(deathroll game) {self.p1_id} vs {self.p2_id}, for {self.bet}\n'

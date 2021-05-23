@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # Database imports
 import psycopg2
 
-import deathroll
+import deathroll as dr
 
 # GLOBAL VARIABLES
 
@@ -169,17 +169,18 @@ async def deathroll_start(ctx, opponent: discord.User, bet: int):
         elif(get_gold(opponent.id) < bet):
             message = '{opponent.id} does not have enough gold.'
         else:
-            deathroll_games.push(deathroll.Game(ctx.msessage.author.id, opponent.id, bet))
-            message = '''
-                        Deathroll game has begun.\n
-                        Players:\n
-                        @%s\n
-                        @%s\n
-                        \n
-                        Bet: %d\n
-                        \n
-                        @%s may now `$deathroll`.
-                        '''
+            game = dr.Game(ctx.message.author.id, opponent.id, bet)
+            deathroll_games[ctx.message.author.id] = game
+            deathroll_games[opponent.id] = game
+            message = ('Deathroll game has begun.\n\n'
+                        'Players:\n'
+                        '{p1}\n'
+                        '{p2}\n\n'
+                        'Bet: {bet}\n\n'
+                        '{p1} may now `$deathroll`.').format(
+                            p1=ctx.message.author.display_name,
+                            p2=opponent.display_name,
+                            bet=bet) # wrong formatting?
     await ctx.send(message)
 
 @bot.command(name='deathroll')
@@ -205,7 +206,7 @@ async def deathroll(ctx):
 
 
 @bot.command(name='deathroll_abandoned')
-async def deathroll(ctx, oppenent):
+async def deathroll_abandoned(ctx, oppenent):
     """Checks to see if an opponent has abandonded a game
 
     If the opponent has indeed abandoned the game, then the
@@ -220,11 +221,11 @@ def deathroll_win(winner, gold):
     """
 
 
+# Returns the game that the user with id is in, or None
 def deathroll_game_with(id):
     for deathroll_game in deathroll_games:
         if(deathroll_game.p1_id == id or deathroll_game.p2_id == id):
             return deathroll_game
-
     return None
 
 
