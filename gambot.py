@@ -174,7 +174,7 @@ async def deathroll_accept(ctx, opponent: discord.User):
         deathroll_games[opponent.id] = game
         deathroll_games[author.id] = game
         deathroll_invites[author.id].remove(invite)
-        if(len(deathroll_invites[author.id]) is 0): # odd, but works i guess
+        if(len(deathroll_invites[author.id]) == 0): # odd, but works i guess
             del deathroll_invites[author.id]
         message = ('Deathroll game has begun!\n'
                     'Players:\n'
@@ -184,24 +184,25 @@ async def deathroll_accept(ctx, opponent: discord.User):
                     f'<@{opponent.id}> must roll first with `$deathroll`')
 
     await ctx.send(message)
-    print(deathroll_invites)
-    print(deathroll_games)
 
 
 @bot.command(name='deathroll_decline')
 async def deathroll_decline(ctx, opponent: discord.User):
     global deathroll_invites
 
-    invite = deathroll_inv_from(opponent)
+    author = ctx.message.author
+    invite = deathroll_inv_from(opponent, author)
     if(invite is None):
-        message = (f'{ctx.message.author.mention}, you have no invitations '
+        message = (f'{author.mention}, you have no invitations '
                     f'from the user {opponent.display_name}')
     else:
-        deathroll_invites[ctx.message.author.id].remove(invite)
-        message = (f'{opponent.mention}, {ctx.message.author.mention} '
+        deathroll_invites[author.id].remove(invite)
+        if(len(deathroll_invites[author.id]) == 0):
+            del deathroll_invites[author.id]
+        message = (f'{opponent.mention}, {author.mention} '
                     'has declined your invitation.')
 
-    ctx.send(message)
+    await ctx.send(message)
 
 
 @bot.command(name='deathroll')
