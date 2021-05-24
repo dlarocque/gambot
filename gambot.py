@@ -116,11 +116,11 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    update_gold(message.author.id, 1)
+    update_gold(message.author, 1)
 
     # Unique message response
     if message.content == 'Hey Gambot':
-        await message.channel.send(f'Hey {message.author.display_name} :)')
+        await message.channel.send(f'Hey {message.author.display_name}, https://www.youtube.com/watch?v=KLuX1oj1wHc.')
 
     # The on_message method looks at every single message, and can prevent
     # bot commands from being read in, so we do this to prevent that.
@@ -134,7 +134,7 @@ async def deathroll_invite(ctx, opponent: discord.User, bet: int):
     author = ctx.message.author
     if(deathroll_game_with(author.id) is not None):
         message = f'{author.mention}, how about you finish your game first!'
-    elif(deathroll_inv_from(author.id, opponent.id) is not None):
+    elif(deathroll_inv_from(author, opponent) is not None):
         message = (f'{author.mention}, you already have a pending invitation '
                     f'towards {opponent.display_name}')
     else:
@@ -156,7 +156,7 @@ async def deathroll_accept(ctx, opponent: discord.User):
     global deathroll_invites
 
     author = ctx.message.author
-    invite = deathroll_inv_from(opponent.id, author.id)
+    invite = deathroll_inv_from(opponent, author)
     # I should probably refactor this somehow
     if(deathroll_game_with(author.id) is not None):
         message = (f'{author.mention} finish your current game before '
@@ -186,14 +186,25 @@ async def deathroll_accept(ctx, opponent: discord.User):
     print(deathroll_games)
 
 
+@bot.command(name='deathroll_decline')
+async def deathroll_decline(ctx, opponent: discord.User):
+    global deathroll_invites
+
+    invite = deathroll_inv_from(opponent)
+    if(invite is None):
+        message = (f'{ctx.message.author.mention}, you have no invitations '
+                    f'from the user {opponent.display_name}')
+    else:
+        deathroll_invites[ctx.message.author.id].remove(invite)
+        message = (f'{opponent.mention}, {ctx.message.author.mention} '
+                    'has declined your invitation.')
+
+    ctx.send(message)
+
+
 @bot.command(name='deathroll')
 async def deathroll(ctx):
     global deathroll_games
-
-
-@bot.command(name='deathroll_decline')
-async def deathroll_decline(ctx, opponent):
-    global deathroll_invites
 
 
 @bot.command(name='deathroll_abandoned')
@@ -217,12 +228,12 @@ def deathroll_game_with(id):
 
 
 # Returns an invitation from p1_id towards p2_id
-def deathroll_inv_from(p1_id, p2_id):
+def deathroll_inv_from(p1: discord.User, p2: discord.User):
     global deathroll_invites
 
     try:
-        for invite in deathroll_invites[p2_id]:
-            if(invite.player.id is p1_id):
+        for invite in deathroll_invites[p2.id]:
+            if(invite.player.id is p1.id):
                 return invite
     except(KeyError) as error:
         return None # ? idk
@@ -263,15 +274,17 @@ async def github(ctx):
     await ctx.send('https://github.com/dlarocque/Gambot')
 
 
-def update_gold(user_id, to_add):
+def update_gold(user: discord.User, to_add):
     global cursor
     global connection
+
+    print(f'updated {user.display_name} gold by {to_add}')
 
     cursor.execute('''
                     UPDATE gambot.gold
                     SET gold = gold + %s
                     WHERE user_id = %s
-                   ''', (to_add, user_id))
+                   ''', (to_add, user.id))
     connection.commit() # Commit changes to gambot.gold
 
 
