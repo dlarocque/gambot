@@ -132,7 +132,7 @@ async def deathroll_invite(ctx, opponent: discord.User, bet: int):
     global deathroll_invites
 
     author = ctx.message.author
-    if(deathroll_game_with(author.id) is not None):
+    if(deathroll_game_with(author) is not None):
         message = f'{author.mention}, how about you finish your game first!'
     elif(deathroll_inv_from(author, opponent) is not None):
         message = (f'{author.mention}, you already have a pending invitation '
@@ -158,7 +158,7 @@ async def deathroll_accept(ctx, opponent: discord.User):
     author = ctx.message.author
     invite = deathroll_inv_from(opponent, author)
     # I should probably refactor this somehow
-    if(deathroll_game_with(author.id) is not None):
+    if(deathroll_game_with(author) is not None):
         message = (f'{author.mention} finish your current game before '
                     'accepting another invite.')
     elif(invite is None):
@@ -170,10 +170,12 @@ async def deathroll_accept(ctx, opponent: discord.User):
     elif(get_gold(opponent.id) < invite.bet):
         message = f'{opponent.mention}, can\'t afford to bet that much anymore.'
     else:
-        game = dr.Game(opponent.id, author.id, invite.bet)
+        game = dr.Game(opponent, author, invite.bet)
         deathroll_games[opponent.id] = game
         deathroll_games[author.id] = game
-        deathroll_invites[author.id].remove(invite) # can leave empty list
+        deathroll_invites[author.id].remove(invite)
+        if(len(deathroll_invites[author.id]) is 0): # odd, but works i guess
+            del deathroll_invites[author.id]
         message = ('Deathroll game has begun!\n'
                     'Players:\n'
                     f'<@{opponent.id}>\nVS\n'
@@ -206,6 +208,17 @@ async def deathroll_decline(ctx, opponent: discord.User):
 async def deathroll(ctx):
     global deathroll_games
 
+    author = ctx.message.author
+    game = deathroll_game_with(author)
+    if(game is None):
+        message = f'{author.mention} you are not in a game right now.'
+    elif(game.turn.id is not author.id):
+        message = f'{author.mention}, it is not your turn.'
+    else:
+        message = game.roll()
+
+    await ctx.send(message)
+
 
 @bot.command(name='deathroll_abandoned')
 async def deathroll_abandoned(ctx, oppenent):
@@ -217,11 +230,11 @@ def deathroll_win(winner, gold):
 
 
 # Returns the game that the user with id is in, or None
-def deathroll_game_with(id):
+def deathroll_game_with(player: discord.User):
     global deathroll_games
 
     try:
-        game = deathroll_games[id]
+        game = deathroll_games[player.id]
     except(KeyError) as error:
         game = None # ?
     return game
@@ -260,6 +273,8 @@ async def invites(ctx):
     
     try:
         invites = deathroll_invites[ctx.message.author.id]
+        if(invites is None):
+            raise KeyError # should fix this
         message = f'{ctx.message.author.mention}\'s invitations:\n'
         for invite in invites:
             message += str(invite) + '\n'
