@@ -3,6 +3,8 @@
 # IMPORTS
 import time
 
+import discord
+
 # CLASSES
 class Game:
     """An Instance of a Deathroll game
@@ -32,10 +34,10 @@ class Invite:
     - These invites are stored in the deathroll_invites[opponent.id] dict.
     """
 
-    def __init__(self, player_id, bet):
-        self.player_id = player_id
+    def __init__(self, player: discord.User, bet):
+        self.player = player
         self.bet = bet
 
     def __str__(self):
         # not the prettiest __str__ ever
-        return f'(deathroll invite) {self.player_id} sent an invite for {self.bet}'
+        return f'Deathroll invite: {self.player.display_name} sent an invite for {self.bet} gold'
