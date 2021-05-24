@@ -1,7 +1,9 @@
 # Gambot/deathroll.py
 
+# IMPORTS
 import time
 
+# CLASSES
 class Game:
     """An Instance of a Deathroll game
 
@@ -20,3 +22,20 @@ class Game:
 
     def __str__(self):
         return f'(deathroll game) {self.p1_id} vs {self.p2_id}, for {self.bet}\n'
+
+
+class Invite:
+    """An invitation from a player with a given bet
+
+    - These invitations are generated when an member sends a deathroll invite 
+    to another player.
+    - These invites are stored in the deathroll_invites[opponent.id] dict.
+    """
+
+    def __init__(self, player_id, bet):
+        self.player_id = player_id
+        self.bet = bet
+
+    def __str__(self):
+        # not the prettiest __str__ ever
+        return f'(deathroll invite) {self.player_id} sent an invite for {self.bet}'
