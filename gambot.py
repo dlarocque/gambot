@@ -216,18 +216,36 @@ async def deathroll(ctx):
     elif(game.turn.id is not author.id):
         message = f'{author.mention}, it is not your turn.'
     else:
-        message = game.roll()
+        roll = game.roll()
+        
+        if(roll == 0):
+            message = deathroll_win(game.get_opponent(author), author, game)
+        else:
+            message = (f'{author.mention} rolled a {roll}\n'
+                        'The game continues.\n'
+                        f'Next roll: 0 - {roll}')
 
     await ctx.send(message)
 
 
 @bot.command(name='deathroll_abandoned')
-async def deathroll_abandoned(ctx, oppenent):
+async def deathroll_abandoned(ctx, opponent: discord.User):
     global deathroll_games
 
 
-def deathroll_win(winner, gold):
+def deathroll_win(winner: discord.User, loser: discord.User, game: dr.Game):
     global deathroll_games
+
+    # Distributes gains and losses
+    update_gold(winner, game.bet)
+    update_gold(loser, -game.bet)
+
+    # Game is over, we delete them from the set of games
+    del deathroll_games[winner.id]
+    del deathroll_games[loser.id]
+    
+    message = (f'{winner.mention} has won {game.bet} gold!')
+    return message
 
 
 # Returns the game that the user with id is in, or None
@@ -290,7 +308,7 @@ async def github(ctx):
     await ctx.send('https://github.com/dlarocque/Gambot')
 
 
-def update_gold(user: discord.User, to_add):
+def update_gold(user: discord.User, to_add: int):
     global cursor
     global connection
 
@@ -315,8 +333,7 @@ def get_gold(user_id):
     if(output is not None):
         gold = output[0]
         return gold
-    return None
-    
+    return None    
 
 
 # This might be unecessary, but whatever

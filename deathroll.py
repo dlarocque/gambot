@@ -2,6 +2,7 @@
 
 # IMPORTS
 import time
+import random
 
 import discord
 
@@ -28,7 +29,24 @@ class Game:
     
     def roll(self):
         """Plays the next players turn in the game"""
+        roll = random.randint(0, self.next_roll)
+        self.next_roll = roll
         self.turn = self.player2
+
+        print(roll)
+
+        return roll
+
+    
+    def get_opponent(self, player: discord.User):
+        """Returns the player that the player is playing against"""
+        if(player.id == self.player1.id):
+            return self.player2
+        elif(player.id == self.player2.id):
+            return self.player1
+        else:
+            return None
+
 
 
 
