@@ -176,8 +176,10 @@ async def deathroll_accept(ctx, opponent: discord.User):
         deathroll_games[opponent.id] = game
         deathroll_games[author.id] = game
         deathroll_invites[author.id].remove(invite)
+
         if(len(deathroll_invites[author.id]) == 0):  # odd, but works i guess
             del deathroll_invites[author.id]
+
         message = ('Deathroll game has begun!\n'
                    'Players:\n'
                    f'<@{opponent.id}>\nVS\n'
@@ -218,7 +220,7 @@ async def deathroll(ctx):
     elif(game.turn.id is not author.id):
         message = f'{author.mention}, it is not your turn.'
     else:
-        roll = game.roll()
+        roll = game.roll(author)
 
         if(roll == 0):
             message = deathroll_win(game.get_opponent(author), author, game)
@@ -233,6 +235,25 @@ async def deathroll(ctx):
 @bot.command(name='deathroll_abandoned')
 async def deathroll_abandoned(ctx, opponent: discord.User):
     global deathroll_games
+
+    max_afk_time = 180.0  # seconds
+    author = ctx.message.author
+    game = deathroll_game_with(author)
+    if(game is None):
+        message = f'{author.mention} you are not in a game right now.'
+    elif(game.get_opponent(author) is not opponent):
+        message = (f'{author.mention} you are not in a game with '
+                   f'{opponent.display_name} right now.')
+    elif(game.t_since_roll(opponent) > max_afk_time):
+        message = (f'{opponent.mention} has not been active in over three '
+                   'minutes, they have automically surrendered the game')
+        deathroll_win(winner=author, loser=opponent, game=game)
+    else:
+        time_left = max_afk_time - game.t_since_roll(opponent)
+        message = (f'{author.mention}, your opponent is not AFK yet.\n'
+                   f'They still have {time_left} seconds.')
+
+    await ctx.send(message)
 
 
 def deathroll_win(winner: discord.User, loser: discord.User, game: dr.Game):
@@ -257,7 +278,7 @@ def deathroll_game_with(player: discord.User):
     try:
         game = deathroll_games[player.id]
     except(KeyError):
-        game = None  # ?
+        game = None  # don't think it's necessary to throw an error here
     return game
 
 
@@ -270,7 +291,7 @@ def deathroll_inv_from(p1: discord.User, p2: discord.User):
             if(invite.player.id is p1.id):
                 return invite
     except(KeyError):
-        return None  # ? idk
+        return None  # don't think it's necessary to throw an error here
     return None
 
 
@@ -296,11 +317,13 @@ async def invites(ctx):
         invites = deathroll_invites[ctx.message.author.id]
         if(invites is None):
             raise KeyError  # should fix this
+
         message = f'{ctx.message.author.mention}\'s invitations:\n'
         for invite in invites:
             message += str(invite) + '\n'
     except(KeyError):
         message = f'{ctx.message.author.mention} has no pending invitations'
+
     await ctx.send(message)
 
 
