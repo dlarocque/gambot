@@ -27,29 +27,31 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='$', intents=intents)
 
 # PostgreSQL database variables
-connection = None # Connection to database
+connection = None  # Connection to database
 cursor = None     # Cursor in connection
 
-deathroll_games = {} # Deathroll games in progress
-deathroll_invites = {} # Pending deathroll invitations
+deathroll_games = {}  # Deathroll games in progress
+deathroll_invites = {}  # Pending deathroll invitations
 
 # Connect to PostgreSQL database
+
+
 def connect():
     global cursor
     global connection
 
     try:
         print('Connecting to the PostgreSQL database...')
-        connection = psycopg2.connect (
-        user = 'postgres',
-        password = PSQL_PASS,
-        host = 'localhost',
-        port = '5432',
-        database = 'postgres'
+        connection = psycopg2.connect(
+            user='postgres',
+            password=PSQL_PASS,
+            host='localhost',
+            port='5432',
+            database='postgres'
         )
 
         cursor = connection.cursor()
-    except(Exception, psycopg2.error) as error:
+    except(Exception, psycopg2.Error) as error:
         print(error)
     finally:
         if connection is not None:
@@ -57,8 +59,7 @@ def connect():
             print('PostgreSQL version: ')
             cursor.execute('SELECT version()')
             print(cursor.fetchone())
-            print() # :)
-
+            print()  # :)
 
 
 @bot.event
@@ -103,7 +104,7 @@ def collect_data():
                                ''',
                                (member.id, 0))
 
-    connection.commit() # Commit changes to database
+    connection.commit()  # Commit changes to database
     print('Done collecting user data.\n')
 
 
@@ -137,7 +138,7 @@ async def deathroll_invite(ctx, opponent: discord.User, bet: int):
         message = f'{author.mention}, how about you finish your game first!'
     elif(deathroll_inv_from(author, opponent) is not None):
         message = (f'{author.mention}, you already have a pending invitation '
-                    f'towards {opponent.display_name}')
+                   f'towards {opponent.display_name}')
     else:
         if(get_gold(author.id) < bet):
             message = f'{author.mention}, you are too broke for that bet.'
@@ -145,8 +146,8 @@ async def deathroll_invite(ctx, opponent: discord.User, bet: int):
             invite = dr.Invite(author, bet)
             deathroll_invites.setdefault(opponent.id, []).append(invite)
             message = (f'<@{opponent.id}>, <@{author.id}> '
-                        'has invited you to a deathroll game.\n'
-                        f'Bet: {bet} gold')
+                       'has invited you to a deathroll game.\n'
+                       f'Bet: {bet} gold')
 
     await ctx.send(message)
 
@@ -161,11 +162,11 @@ async def deathroll_accept(ctx, opponent: discord.User):
     # I should probably refactor this somehow
     if(deathroll_game_with(author) is not None):
         message = (f'{author.mention} finish your current game before '
-                    'accepting another invite.')
+                   'accepting another invite.')
     elif(invite is None):
         message = (f'{author.mention}, there is no pending invitation from '
-                    f'{opponent.display_name}.  To see all of your pending'
-                    'invitations, you can use `$invites`')
+                   f'{opponent.display_name}.  To see all of your pending'
+                   'invitations, you can use `$invites`')
     elif(get_gold(author.id) < invite.bet):
         message = f'{author.mention}, you can\'t afford to bet that much.'
     elif(get_gold(opponent.id) < invite.bet):
@@ -175,14 +176,14 @@ async def deathroll_accept(ctx, opponent: discord.User):
         deathroll_games[opponent.id] = game
         deathroll_games[author.id] = game
         deathroll_invites[author.id].remove(invite)
-        if(len(deathroll_invites[author.id]) == 0): # odd, but works i guess
+        if(len(deathroll_invites[author.id]) == 0):  # odd, but works i guess
             del deathroll_invites[author.id]
         message = ('Deathroll game has begun!\n'
-                    'Players:\n'
-                    f'<@{opponent.id}>\nVS\n'
-                    f'<@{author.id}>\n\n'
-                    f'Bet: {invite.bet}\n\n'
-                    f'<@{opponent.id}> must roll first with `$deathroll`')
+                   'Players:\n'
+                   f'<@{opponent.id}>\nVS\n'
+                   f'<@{author.id}>\n\n'
+                   f'Bet: {invite.bet}\n\n'
+                   f'<@{opponent.id}> must roll first with `$deathroll`')
 
     await ctx.send(message)
 
@@ -195,13 +196,13 @@ async def deathroll_decline(ctx, opponent: discord.User):
     invite = deathroll_inv_from(opponent, author)
     if(invite is None):
         message = (f'{author.mention}, you have no invitations '
-                    f'from the user {opponent.display_name}')
+                   f'from the user {opponent.display_name}')
     else:
         deathroll_invites[author.id].remove(invite)
         if(len(deathroll_invites[author.id]) == 0):
             del deathroll_invites[author.id]
         message = (f'{opponent.mention}, {author.mention} '
-                    'has declined your invitation.')
+                   'has declined your invitation.')
 
     await ctx.send(message)
 
@@ -218,13 +219,13 @@ async def deathroll(ctx):
         message = f'{author.mention}, it is not your turn.'
     else:
         roll = game.roll()
-        
+
         if(roll == 0):
             message = deathroll_win(game.get_opponent(author), author, game)
         else:
             message = (f'{author.mention} rolled a {roll}\n'
-                        'The game continues.\n'
-                        f'Next roll: 0 - {roll}')
+                       'The game continues.\n'
+                       f'Next roll: 0 - {roll}')
 
     await ctx.send(message)
 
@@ -244,7 +245,7 @@ def deathroll_win(winner: discord.User, loser: discord.User, game: dr.Game):
     # Game is over, we delete them from the set of games
     del deathroll_games[winner.id]
     del deathroll_games[loser.id]
-    
+
     message = (f'{winner.mention} has won {game.bet} gold!')
     return message
 
@@ -255,8 +256,8 @@ def deathroll_game_with(player: discord.User):
 
     try:
         game = deathroll_games[player.id]
-    except(KeyError) as error:
-        game = None # ?
+    except(KeyError):
+        game = None  # ?
     return game
 
 
@@ -268,8 +269,8 @@ def deathroll_inv_from(p1: discord.User, p2: discord.User):
         for invite in deathroll_invites[p2.id]:
             if(invite.player.id is p1.id):
                 return invite
-    except(KeyError) as error:
-        return None # ? idk
+    except(KeyError):
+        return None  # ? idk
     return None
 
 
@@ -278,7 +279,7 @@ async def gold(ctx):
     """Tells the user how much gold they have
     """
     global cursor
-    
+
     cursor.execute('''
                     SELECT gold from gambot.gold
                     WHERE user_id = %s
@@ -290,18 +291,17 @@ async def gold(ctx):
 @bot.command(name='invites')
 async def invites(ctx):
     global deathroll_invites
-    
+
     try:
         invites = deathroll_invites[ctx.message.author.id]
         if(invites is None):
-            raise KeyError # should fix this
+            raise KeyError  # should fix this
         message = f'{ctx.message.author.mention}\'s invitations:\n'
         for invite in invites:
             message += str(invite) + '\n'
-    except(KeyError) as error:
+    except(KeyError):
         message = f'{ctx.message.author.mention} has no pending invitations'
     await ctx.send(message)
-
 
 
 @bot.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
@@ -320,7 +320,7 @@ def update_gold(user: discord.User, to_add: int):
                     SET gold = gold + %s
                     WHERE user_id = %s
                    ''', (to_add, user.id))
-    connection.commit() # Commit changes to gambot.gold
+    connection.commit()  # Commit changes to gambot.gold
 
 
 def get_gold(user_id):
@@ -330,11 +330,11 @@ def get_gold(user_id):
                     SELECT gold FROM gambot.gold
                     WHERE user_id = %s
                     ''', (user_id, ))
-    output = cursor.fetchone() # returns a tuple if the user exists
+    output = cursor.fetchone()  # returns a tuple if the user exists
     if(output is not None):
         gold = output[0]
         return gold
-    return None    
+    return None
 
 
 # This might be unecessary, but whatever
