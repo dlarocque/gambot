@@ -1,4 +1,7 @@
 # Gambot
+
+[IN PROGESS]
+
 Discord bot that tracks members' interactions in a server and awards them points accordingly.
 The points that members earn through their interactions with others can then be gambled in a **deathroll** game!
 
