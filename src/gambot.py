@@ -14,6 +14,8 @@ import psycopg2
 
 import deathroll as dr
 
+import general_commands
+
 # GLOBAL VARIABLES
 
 # Environment variables
@@ -25,6 +27,8 @@ PSQL_PASS = os.getenv('PSQL_PASS')
 # Discord bot variables
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='$', intents=intents)
+gen = general_commands.GeneralCommands(bot)
+bot.add_cog(gen)
 
 # PostgreSQL database variables
 connection = None  # Connection to database
@@ -106,27 +110,6 @@ def collect_data():
 
     connection.commit()  # Commit changes to database
     print('Done collecting user data.\n')
-
-
-# Called when a message is sent in a guild the bot is connected to
-@bot.event
-async def on_message(message):
-    global connection
-    global cursor
-
-    # Do not respond to bots
-    if message.author.bot:
-        return
-
-    update_gold(message.author, 1)
-
-    # Unique message response
-    if message.content == 'Hey Gambot':
-        await message.channel.send(f'Hey {message.author.display_name}, https://www.youtube.com/watch?v=KLuX1oj1wHc.')
-
-    # The on_message method looks at every single message, and can prevent
-    # bot commands from being read in, so we do this to prevent that.
-    await bot.process_commands(message)
 
 
 @bot.command(name='deathroll_invite')
