@@ -29,20 +29,21 @@ class Game:
     def __str__(self):
         return f'(deathroll game) {self.player1.display_name} vs {self.player2.display_name}, for {self.bet} gold\n'
 
-    def roll(self, player: discord.User):
-        """Plays the next players turn in the game"""
+    def roll(self):
+        """Plays the next players turn in the game
+        
+        Assumes that self.turn is correctly assigned before the method.
+        """
         roll = random.randint(0, self.next_roll)
-
-        if(player is self.player1):
+        
+        if(self.turn is self.player1):
             self.turn = self.player2
             self.next_roll = roll
             self.p1_last_activity = time.mktime(time.localtime())
-        elif(player is self.player2):
+        elif(self.turn is self.player2):
             self.turn = self.player1
             self.next_roll = roll
             self.p2_last_activity = time.mktime(time.localtime())
-        else:
-            raise ValueError(f'Player {player} is not part of this game.')
 
         return roll
 
