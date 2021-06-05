@@ -50,6 +50,11 @@ class DeathrollCommands(commands.Cog):
             message = (f'{author.mention}, there is no pending invitation from '
                        f'{opponent.display_name}.  To see all of your pending'
                        'invitations, you can use `$invites`')
+        elif(invite.is_expired()):
+            self.delete_inv_to(author, invite)
+            message = (f'{author.mention}, the invitation from '
+                       f'{opponent.display_name} has expired, and has now '
+                       f'been deleted.  Ask them to send another invitation.')
         elif(self.db.get_gold(author.id) < invite.bet):
             message = f'{author.mention}, you can\'t afford to bet that much.'
         elif(self.db.get_gold(opponent.id) < invite.bet):
@@ -58,11 +63,7 @@ class DeathrollCommands(commands.Cog):
             game = dr.Game(opponent, author, invite.bet)
             deathroll_games[opponent.id] = game
             deathroll_games[author.id] = game
-            deathroll_invites[author.id].remove(invite)
-
-            # odd, but works i guess
-            if(len(deathroll_invites[author.id]) == 0):
-                del deathroll_invites[author.id]
+            self.delete_inv_to(author, invite)
 
             message = ('Deathroll game has begun!\n'
                        'Players:\n'
@@ -170,3 +171,12 @@ class DeathrollCommands(commands.Cog):
         except(KeyError):
             return None  # don't think it's necessary to throw an error here
         return None
+
+    def delete_inv_to(self, player: discord.User, invite: dr.Invite):
+        global deathroll_invites
+
+        deathroll_invites[player.id].remove(invite)
+        if(len(deathroll_invites[player.id]) == 0):
+            del deathroll_invites[player.id]
+
+

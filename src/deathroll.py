@@ -6,6 +6,9 @@ import random
 
 import discord
 
+# GLOBAL VARIABLES
+expire_time = 300.0  # seconds
+
 # CLASSES
 
 
@@ -31,11 +34,11 @@ class Game:
 
     def roll(self):
         """Plays the next players turn in the game
-        
+
         Assumes that self.turn is correctly assigned before the method.
         """
         roll = random.randint(0, self.next_roll)
-        
+
         if(self.turn is self.player1):
             self.turn = self.player2
             self.next_roll = roll
@@ -79,6 +82,24 @@ class Invite:
     def __init__(self, player: discord.User, bet):
         self.player = player
         self.bet = bet
+        self.invite_time = time.mktime(time.localtime())
+
+    def is_expired(self):
+        """Returns True or False based on if the invite has expired
+
+        An invitation has expired if 'expire_time' seconds have passed
+        since the invitation was sent.
+        """
+        global expire_time
+
+        time_since_inv = time.mktime(time.localtime()) - self.invite_time
+        print(time_since_inv)
+        print(expire_time)
+        return time_since_inv > expire_time
 
     def __str__(self):
-        return f'Deathroll invite: {self.player.display_name} sent an invite for {self.bet} gold'
+        if(self.is_expired()):
+            output = f'[EXPIRED] Deathroll invite: {self.player.display_name} sent an invite for {self.bet} gold.'
+        else:
+            output = f'Deathroll invite: {self.player.display_name} sent an invite for {self.bet} gold.'
+        return output
