@@ -64,7 +64,7 @@ class DeathrollCommands(commands.Cog):
         elif(self.db.get_gold(opponent.id) < invite.bet):
             message = f'{opponent.mention}, can\'t afford to bet that much anymore.'
         else:
-            game = dr.Game(opponent, author, invite.bet)
+            game = dr.Game(opponent, author, invite.bet, invite.channel)
             deathroll_games[opponent.id] = game
             deathroll_games[author.id] = game
             self.delete_inv_to(author, invite)
@@ -102,6 +102,10 @@ class DeathrollCommands(commands.Cog):
         game = self.deathroll_game_with(author)
         if(game is None):
             message = f'{author.mention} you are not in a game right now.'
+        elif(game.channel is not ctx.message.channel):
+            message = (f'{author.mention}, games must be played in the same '
+                       f'channels that they started in.  Try again in the '
+                       f'#{game.channel} channel.')
         elif(game.turn.id is not author.id):
             message = f'{author.mention}, it is not your turn.'
         else:
