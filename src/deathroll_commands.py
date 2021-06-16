@@ -27,7 +27,7 @@ class DeathrollCommands(commands.Cog):
             if(self.db.get_gold(author.id) < bet):
                 message = f'{author.mention}, you are too broke for that bet.'
             else:
-                invite = dr.Invite(author, bet)
+                invite = dr.Invite(author, bet, ctx.message.channel)
                 deathroll_invites.setdefault(
                     opponent.id, []).append(invite)
                 message = (f'<@{opponent.id}>, <@{author.id}> '
@@ -50,6 +50,10 @@ class DeathrollCommands(commands.Cog):
             message = (f'{author.mention}, there is no pending invitation from '
                        f'{opponent.display_name}.  To see all of your pending'
                        'invitations, you can use `$invites`')
+        elif(invite.channel is not ctx.message.channel):
+            message = (f'{author.mention}, invitations need to be accepted '
+                       f'in the same channels that they were sent in.  '
+                       f'You need to accept this invitation in #{invite.channel}')
         elif(invite.is_expired()):
             self.delete_inv_to(author, invite)
             message = (f'{author.mention}, the invitation from '
