@@ -24,7 +24,7 @@ class Database(commands.Cog):
                 password=self.password,
                 host='localhost',
                 port='5432',
-                database='postgres'
+                database='gambot'
             )
 
             cursor = connection.cursor()
@@ -49,15 +49,15 @@ class Database(commands.Cog):
         for guild in self.bot.guilds:
             for member in guild.members:
                 cursor.execute('''
-                            SELECT user_id FROM gambot.users
+                            SELECT user_id FROM users
                             WHERE user_id = %s;
                             ''', [member.id])
-                # If the user does not exist in the gambot.users table
+                # If the user does not exist in the users table
                 if(cursor.fetchone() is None):
                     print(
                         f'Collecting data for new user: {member.display_name}')
                     cursor.execute('''
-                                    INSERT INTO gambot.users
+                                    INSERT INTO users
                                     (user_id, discriminator, guild_name,
                                     display_name)
                                     VALUES (%s, %s, %s, %s)
@@ -65,7 +65,7 @@ class Database(commands.Cog):
                                    (member.id, member.discriminator, guild.name,
                                     member.display_name))
                     cursor.execute('''
-                                INSERT INTO gambot.gold
+                                INSERT INTO gold
                                 (user_id, gold)
                                 VALUES (%s, %s)
                                 ''',
@@ -81,17 +81,17 @@ class Database(commands.Cog):
         print(f'updated {user.display_name} gold by {to_add}')
 
         cursor.execute('''
-                        UPDATE gambot.gold
+                        UPDATE gold
                         SET gold = gold + %s
                         WHERE user_id = %s
                     ''', (to_add, user.id))
-        connection.commit()  # Commit changes to gambot.gold
+        connection.commit()  # Commit changes to gold
 
     def get_gold(self, user_id):
         global cursor
 
         cursor.execute('''
-                        SELECT gold FROM gambot.gold
+                        SELECT gold FROM gold
                         WHERE user_id = %s
                         ''', (user_id, ))
         output = cursor.fetchone()  # returns a tuple if the user exists
