@@ -27,7 +27,7 @@ class DeathrollCommands(commands.Cog):
             if(self.db.get_gold(author.id) < bet):
                 message = f'{author.mention}, you are too broke for that bet.'
             else:
-                invite = dr.Invite(author, bet)
+                invite = dr.Invite(author, bet, ctx.message.channel)
                 deathroll_invites.setdefault(
                     opponent.id, []).append(invite)
                 message = (f'<@{opponent.id}>, <@{author.id}> '
@@ -50,6 +50,10 @@ class DeathrollCommands(commands.Cog):
             message = (f'{author.mention}, there is no pending invitation from '
                        f'{opponent.display_name}.  To see all of your pending'
                        'invitations, you can use `$invites`')
+        elif(invite.channel is not ctx.message.channel):
+            message = (f'{author.mention}, invitations need to be accepted '
+                       f'in the same channels that they were sent in.  '
+                       f'You need to accept this invitation in #{invite.channel}')
         elif(invite.is_expired()):
             self.delete_inv_to(author, invite)
             message = (f'{author.mention}, the invitation from '
@@ -60,7 +64,7 @@ class DeathrollCommands(commands.Cog):
         elif(self.db.get_gold(opponent.id) < invite.bet):
             message = f'{opponent.mention}, can\'t afford to bet that much anymore.'
         else:
-            game = dr.Game(opponent, author, invite.bet)
+            game = dr.Game(opponent, author, invite.bet, invite.channel)
             deathroll_games[opponent.id] = game
             deathroll_games[author.id] = game
             self.delete_inv_to(author, invite)
@@ -98,6 +102,10 @@ class DeathrollCommands(commands.Cog):
         game = self.deathroll_game_with(author)
         if(game is None):
             message = f'{author.mention} you are not in a game right now.'
+        elif(game.channel is not ctx.message.channel):
+            message = (f'{author.mention}, games must be played in the same '
+                       f'channels that they started in.  Try again in the '
+                       f'#{game.channel} channel.')
         elif(game.turn.id is not author.id):
             message = f'{author.mention}, it is not your turn.'
         else:

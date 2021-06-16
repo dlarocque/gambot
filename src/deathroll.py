@@ -19,13 +19,14 @@ class Game:
     - We assume that the conditions for a game have been met.
     """
 
-    def __init__(self, player1: discord.User, player2: discord.User, bet):
+    def __init__(self, player1: discord.User, player2: discord.User, bet, channel):
         self.player1 = player1  # id of the player that started the game
         self.player2 = player2  # id of the player that accepted the game
         self.p1_last_activity = time.mktime(
             time.localtime())  # seconds since last roll
         self.p2_last_activity = time.mktime(time.localtime())
         self.bet = bet  # Amount of gold that was bet
+        self.channel = channel # channel that the invitation was sent in
         self.turn = player1  # Whos turn it is to roll next
         self.next_roll = bet  # What to roll on next turn
 
@@ -74,14 +75,15 @@ class Game:
 class Invite:
     """An invitation from a player with a given bet
 
-    - These invitations are generated when an member sends a deathroll invite 
+    - These invitations are generated when an member sends a deathroll invite
     to another player.
     - These invites are stored in the deathroll_invites[opponent.id] dict.
     """
 
-    def __init__(self, player: discord.User, bet):
+    def __init__(self, player: discord.User, bet, channel):
         self.player = player
         self.bet = bet
+        self.channel = channel
         self.invite_time = time.mktime(time.localtime())
 
     def is_expired(self):
