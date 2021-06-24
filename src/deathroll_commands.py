@@ -27,7 +27,7 @@ class DeathrollCommands(commands.Cog):
             if(self.db.get_gold(author.id) < bet):
                 message = f'{author.mention}, you are too broke for that bet.'
             else:
-                invite = dr.Invite(author, bet, ctx.message.channel)
+                invite = dr.DeathrollInvite(author, bet, ctx.message.channel)
                 deathroll_invites.setdefault(
                     opponent.id, []).append(invite)
                 message = (f'<@{opponent.id}>, <@{author.id}> '
@@ -64,7 +64,7 @@ class DeathrollCommands(commands.Cog):
         elif(self.db.get_gold(opponent.id) < invite.bet):
             message = f'{opponent.mention}, can\'t afford to bet that much anymore.'
         else:
-            game = dr.Game(opponent, author, invite.bet, invite.channel)
+            game = dr.DeathrollGame(opponent, author, invite.bet, invite.channel)
             deathroll_games[opponent.id] = game
             deathroll_games[author.id] = game
             self.delete_inv_to(author, invite)
@@ -142,7 +142,7 @@ class DeathrollCommands(commands.Cog):
 
         await ctx.send(message)
 
-    def deathroll_win(self, winner: discord.User, loser: discord.User, game: dr.Game):
+    def deathroll_win(self, winner: discord.User, loser: discord.User, game: dr.DeathrollGame):
         global deathroll_games
 
         # Distributes gains and losses
@@ -180,7 +180,7 @@ class DeathrollCommands(commands.Cog):
             return None  # don't think it's necessary to throw an error here
         return None
 
-    def delete_inv_to(self, player: discord.User, invite: dr.Invite):
+    def delete_inv_to(self, player: discord.User, invite: dr.DeathrollInvite):
         global deathroll_invites
 
         deathroll_invites[player.id].remove(invite)

@@ -24,10 +24,6 @@ class GeneralCommands(commands.Cog):
         if message.content == 'Hey Gambot':
             await message.channel.send(f'Hey {message.author.display_name}, https://www.youtube.com/watch?v=KLuX1oj1wHc.')
 
-        # The on_message method looks at every single message, and can prevent
-        # bot commands from being read in, so we do this to prevent that.
-        # await bot.process_commands(message)
-
     @commands.command(name='gold')
     async def gold(self, ctx):
         """Tells the user how much gold they have
