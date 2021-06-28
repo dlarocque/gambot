@@ -46,6 +46,7 @@ class GeneralCommands(commands.Cog):
 
         await ctx.send(message)
 
-    @commands.command(name='github', help='Sends a link to Gambot\'s GitHub repo.')
+    @commands.command(name='github',
+                      help='Sends a link to Gambot\'s GitHub repo.')
     async def github(self, ctx):
         await ctx.send('https://github.com/dlarocque/Gambot')

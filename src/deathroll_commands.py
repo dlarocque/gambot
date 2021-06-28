@@ -21,8 +21,9 @@ class DeathrollCommands(commands.Cog):
         if(self.deathroll_game_with(author) is not None):
             message = f'{author.mention}, how about you finish your game first!'
         elif(self.deathroll_inv_from(author, opponent) is not None):
-            message = (f'{author.mention}, you already have a pending invitation '
-                       f'towards {opponent.display_name}')
+            message = (
+                f'{author.mention}, you already have a pending invitation '
+                f'towards {opponent.display_name}')
         else:
             if(self.db.get_gold(author.id) < bet):
                 message = f'{author.mention}, you are too broke for that bet.'
@@ -47,13 +48,15 @@ class DeathrollCommands(commands.Cog):
             message = (f'{author.mention} finish your current game before '
                        'accepting another invite.')
         elif(invite is None):
-            message = (f'{author.mention}, there is no pending invitation from '
-                       f'{opponent.display_name}.  To see all of your pending'
-                       'invitations, you can use `$invites`')
+            message = (
+                f'{author.mention}, there is no pending invitation from '
+                f'{opponent.display_name}.  To see all of your pending'
+                'invitations, you can use `$invites`')
         elif(invite.channel is not ctx.message.channel):
-            message = (f'{author.mention}, invitations need to be accepted '
-                       f'in the same channels that they were sent in.  '
-                       f'You need to accept this invitation in #{invite.channel}')
+            message = (
+                f'{author.mention}, invitations need to be accepted '
+                f'in the same channels that they were sent in.  '
+                f'You need to accept this invitation in #{invite.channel}')
         elif(invite.is_expired()):
             self.delete_inv_to(author, invite)
             message = (f'{author.mention}, the invitation from '
@@ -64,7 +67,8 @@ class DeathrollCommands(commands.Cog):
         elif(self.db.get_gold(opponent.id) < invite.bet):
             message = f'{opponent.mention}, can\'t afford to bet that much anymore.'
         else:
-            game = dr.DeathrollGame(opponent, author, invite.bet, invite.channel)
+            game = dr.DeathrollGame(
+                opponent, author, invite.bet, invite.channel)
             deathroll_games[opponent.id] = game
             deathroll_games[author.id] = game
             self.delete_inv_to(author, invite)
@@ -142,7 +146,11 @@ class DeathrollCommands(commands.Cog):
 
         await ctx.send(message)
 
-    def deathroll_win(self, winner: discord.User, loser: discord.User, game: dr.DeathrollGame):
+    def deathroll_win(
+            self,
+            winner: discord.User,
+            loser: discord.User,
+            game: dr.DeathrollGame):
         global deathroll_games
 
         # Distributes gains and losses
@@ -186,5 +194,3 @@ class DeathrollCommands(commands.Cog):
         deathroll_invites[player.id].remove(invite)
         if(len(deathroll_invites[player.id]) == 0):
             del deathroll_invites[player.id]
-
-
