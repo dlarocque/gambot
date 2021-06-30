@@ -1,15 +1,8 @@
-# Gambot/deathroll.py
-
-# IMPORTS
 import time
 import random
-
 import discord
 
-# GLOBAL VARIABLES
 expire_time = 300.0  # seconds
-
-# CLASSES
 
 
 class DeathrollGame:
@@ -75,7 +68,14 @@ class DeathrollGame:
                 f'Player {player} is not part of this DeathrollGame.')
 
     def t_since_roll(self, player: discord.User):
-        """Returns the time(s) since the players last roll"""
+        """Time since the players last roll
+
+        Keyword Arguments:
+            player (discord.User): The player who's time since last activity is returned
+
+        Returns: 
+            t_since_roll: time since the players last roll
+        """
         if(player is self.player1):
             t_since_roll = time.mktime(time.localtime) - self.p1_last_activity
         elif(player is self.player2):
@@ -88,12 +88,7 @@ class DeathrollGame:
 
 
 class DeathrollInvite:
-    """An invitation from a player with a given bet
-
-    - These invitations are generated when an member sends a deathroll DeathrollInvite
-    to another player.
-    - These DeathrollInvites are stored in the deathroll_DeathrollInvites[opponent.id] dict.
-    """
+    """An invitation to a deathroll game from a player with a given bet"""
 
     def __init__(self, player: discord.User, bet, channel):
         self.player = player
@@ -102,17 +97,19 @@ class DeathrollInvite:
         self.DeathrollInvite_time = time.mktime(time.localtime())
 
     def is_expired(self):
-        """Returns True or False based on if the DeathrollInvite has expired
+        """Returns whether or not an invite has expired
 
         An invitation has expired if 'expire_time' seconds have passed
         since the invitation was sent.
+
+        Returns:
+            True: invitation has expired
+            False: invitation has not expired
         """
         global expire_time
 
         time_since_inv = time.mktime(
             time.localtime()) - self.DeathrollInvite_time
-        print(time_since_inv)
-        print(expire_time)
         return time_since_inv > expire_time
 
     def __str__(self):

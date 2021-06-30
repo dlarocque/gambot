@@ -20,6 +20,8 @@ PSQL_PASS = os.getenv('PSQL_PASS')
 # Discord bot variables
 bot = commands.Bot(command_prefix='$', intents=discord.Intents.all())
 db = database.Database(bot, PSQL_PASS)
+
+# Command extensions
 bot.add_cog(general_commands.GeneralCommands(bot, db))
 bot.add_cog(deathroll_commands.DeathrollCommands(bot, db))
 
