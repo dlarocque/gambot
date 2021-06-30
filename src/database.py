@@ -9,11 +9,18 @@ connection = None
 
 
 class Database(commands.Cog):
+    """PostgreSQL database for Gambot (local)"""
+
     def __init__(self, bot, password):
         self.bot = bot
         self.password = password
 
     def connect(self):
+        """Connects to the PostgreSQL database using psycopg2
+
+        Changes might need to be made if you're connecting this 
+        to your own database.
+        """
         global cursor
         global connection
 
@@ -38,9 +45,8 @@ class Database(commands.Cog):
                 print(cursor.fetchone())
                 print()  # :)
 
-    # Collect the data from all of the users
-
     def collect_data(self):
+        """Collects all user data from all users in all servers if that data does not already exist"""
         global cursor
         global connection
 
@@ -71,10 +77,18 @@ class Database(commands.Cog):
                                 ''',
                                    (member.id, 0))
 
-        connection.commit()  # Commit changes to database
+        connection.commit()
         print('Done collecting user data.\n')
 
     def update_gold(self, user: discord.User, to_add: int):
+        """Updated the amount of gold a user has
+
+        The user should already exist in the database.  We don't check.
+        
+        Keyword Arguments:
+            user (discord.User): The users to query
+            to_add (int): amount of gold to add (negative to remove)
+        """
         global cursor
         global connection
 
@@ -88,6 +102,15 @@ class Database(commands.Cog):
         connection.commit()  # Commit changes to gold
 
     def get_gold(self, user_id):
+        """Returns the amount of gold a user has
+        
+        Keyword Arguments:
+            user_id: User id to be queried for gold
+
+        Returns:
+            gold: the amount of gold the user has
+            None: the user does not exist
+        """
         global cursor
 
         cursor.execute('''
