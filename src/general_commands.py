@@ -1,4 +1,4 @@
-# Discord imports
+# Discord import
 import discord
 from discord.ext import commands
 
@@ -42,11 +42,11 @@ class GeneralCommands(commands.Cog):
             for invite in invites:
                 message += str(invite) + '\n'
         except(KeyError):  # FIX TODO
-            message = f'{ctx.message.author.mention} has no pending invitations'
+            message = f'{ctx.message.author.mention}, you have no pending invitations'
 
         await ctx.send(message)
 
-    @commands.command(name='github',
-                      help='Sends a link to Gambot\'s GitHub repo.')
+    @commands.command(name='github')
     async def github(self, ctx):
+        """Sends a link to the GitHub repo containing Gambots source code"""
         await ctx.send('https://github.com/dlarocque/Gambot')
