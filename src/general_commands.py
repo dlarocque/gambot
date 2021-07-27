@@ -7,7 +7,7 @@ from deathroll_commands import deathroll_invites
 
 
 class GeneralCommands(commands.Cog):
-    """General commands for the discord bot"""
+    """General commands for the Discord bot"""
 
     def __init__(self, bot, db):
         self.bot = bot
@@ -50,3 +50,8 @@ class GeneralCommands(commands.Cog):
     async def github(self, ctx):
         """Sends a link to the GitHub repo containing Gambots source code"""
         await ctx.send('https://github.com/dlarocque/Gambot')
+
+    @commands.command(name='commands')
+    async def commands(self, ctx):
+        """Provides a user some basic information on how to use Gambot"""
+        await ctx.send('For a full list of commands, visit here: https://github.com/dlarocque/gambot/docs/COMMANDS.md')
