@@ -35,7 +35,7 @@ class GeneralCommands(commands.Cog):
         """Sends a message containing all of the authors pending invitations"""
         try:
             invites = deathroll_invites[ctx.message.author.id]
-            if(invites is None):
+            if invites is None:
                 raise KeyError  # FIX TODO
 
             message = f'{ctx.message.author.mention}\'s invitations:\n'

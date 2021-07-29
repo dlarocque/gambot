@@ -38,7 +38,7 @@ class Database(commands.Cog):
         except(Exception, psycopg2.Error) as error:
             print(error)
         finally:
-            if connection is not None:
+            if connection:
                 print('Successfully connected to PostgreSQL database.\n')
                 print('PostgreSQL version: ')
                 cursor.execute('SELECT version()')
@@ -59,7 +59,7 @@ class Database(commands.Cog):
                             WHERE user_id = %s;
                             ''', [member.id])
                 # If the user does not exist in the users table
-                if(cursor.fetchone() is None):
+                if cursor.fetchone() is None:
                     print(
                         f'Collecting data for new user: {member.display_name}')
                     cursor.execute('''
@@ -118,7 +118,7 @@ class Database(commands.Cog):
                         WHERE user_id = %s
                         ''', (user_id, ))
         output = cursor.fetchone()  # returns a tuple if the user exists
-        if(output is not None):
+        if output:
             gold = output[0]
             return gold
         return None

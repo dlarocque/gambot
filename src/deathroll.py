@@ -36,11 +36,11 @@ class DeathrollGame:
         roll = random.randint(0, self.next_roll)
 
         # Adjust fields for the next roll
-        if(self.turn is self.player1):
+        if self.turn is self.player1:
             self.turn = self.player2
             self.next_roll = roll
             self.p1_last_activity = time.mktime(time.localtime())
-        elif(self.turn is self.player2):
+        elif self.turn is self.player2:
             self.turn = self.player1
             self.next_roll = roll
             self.p2_last_activity = time.mktime(time.localtime())
@@ -59,9 +59,9 @@ class DeathrollGame:
             self.player1 (discord.User): player2's opponent
             self.player2 (discord.User): player1's opponent
         """
-        if(player.id == self.player1.id):
+        if player.id == self.player1.id:
             return self.player2
-        elif(player.id == self.player2.id):
+        elif player.id == self.player2.id:
             return self.player1
         else:
             raise ValueError(
@@ -73,12 +73,12 @@ class DeathrollGame:
         Keyword Arguments:
             player (discord.User): The player who's time since last activity is returned
 
-        Returns: 
+        Returns:
             t_since_roll: time since the players last roll
         """
-        if(player is self.player1):
+        if player is self.player1:
             t_since_roll = time.mktime(time.localtime) - self.p1_last_activity
-        elif(player is self.player2):
+        elif player is self.player2:
             t_since_roll = time.mktime(time.localtime) - self.p2_last_activity
         else:
             raise ValueError(
@@ -113,7 +113,7 @@ class DeathrollInvite:
         return time_since_inv > expire_time
 
     def __str__(self):
-        if(self.is_expired()):
+        if self.is_expired():
             output = f'[EXPIRED] Deathroll DeathrollInvite: {self.player.display_name} sent an DeathrollInvite for {self.bet} gold.'
         else:
             output = f'Deathroll DeathrollInvite: {self.player.display_name} sent an DeathrollInvite for {self.bet} gold.'

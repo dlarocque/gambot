@@ -25,14 +25,14 @@ class DeathrollCommands(commands.Cog):
         global deathroll_invites
 
         author = ctx.message.author
-        if(self.deathroll_game_with(author) is not None):
+        if self.deathroll_game_with(author):
             message = f'{author.mention}, how about you finish your game first!'
-        elif(self.deathroll_inv_from(author, opponent) is not None):
+        elif self.deathroll_inv_from(author, opponent):
             message = (
                 f'{author.mention}, you already have a pending invitation '
                 f'towards {opponent.display_name}')
         else:
-            if(self.db.get_gold(author.id) < bet):
+            if self.db.get_gold(author.id) < bet:
                 message = f'{author.mention}, you are don\'t have enough gold for that bet.'
             else:
                 invite = dr.DeathrollInvite(author, bet, ctx.message.channel)
@@ -57,27 +57,27 @@ class DeathrollCommands(commands.Cog):
         author = ctx.message.author
         invite = self.deathroll_inv_from(opponent, author)
 
-        if(self.deathroll_game_with(author) is not None):
+        if self.deathroll_game_with(author):
             message = (f'{author.mention} finish your current game before '
                        'accepting another invite.')
-        elif(invite is None):
+        elif invite is None:
             message = (
                 f'{author.mention}, there is no pending invitation from '
                 f'{opponent.display_name}.  To see all of your pending'
                 'invitations, you can use `$invites`')
-        elif(invite.channel is not ctx.message.channel):
+        elif invite.channel is not ctx.message.channel:
             message = (
                 f'{author.mention}, invitations need to be accepted '
                 f'in the same channels that they were sent in.  '
                 f'You need to accept this invitation in #{invite.channel}')
-        elif(invite.is_expired()):
+        elif invite.is_expired():
             self.delete_inv_to(author, invite)
             message = (f'{author.mention}, the invitation from '
                        f'{opponent.display_name} has expired, and has now '
                        f'been deleted.  Ask them to send another invitation.')
-        elif(self.db.get_gold(author.id) < invite.bet):
+        elif self.db.get_gold(author.id) < invite.bet:
             message = f'{author.mention}, you can\'t afford to bet that much.'
-        elif(self.db.get_gold(opponent.id) < invite.bet):
+        elif self.db.get_gold(opponent.id) < invite.bet:
             message = f'{opponent.mention}, can\'t afford to bet that much anymore.'
         else:
             game = dr.DeathrollGame(
@@ -109,14 +109,16 @@ class DeathrollCommands(commands.Cog):
 
         author = ctx.message.author
         invite = self.deathroll_inv_from(opponent, author)
-        if(invite is None):
+
+        if invite is None:
             message = (f'{author.mention}, you have no invitations '
                        f'from the user {opponent.display_name}')
         else:
             deathroll_invites[author.id].remove(invite)
             # this is done to make it easier to check if there are no invites
-            if(len(deathroll_invites[author.id]) == 0):
+            if len(deathroll_invites[author.id]) == 0:
                 del deathroll_invites[author.id]
+
             message = (f'{opponent.mention}, {author.mention} '
                        'has declined your invitation.')
 
@@ -131,13 +133,14 @@ class DeathrollCommands(commands.Cog):
         """
         author = ctx.message.author
         game = self.deathroll_game_with(author)
-        if(game is None):
+
+        if game is None:
             message = f'{author.mention} you are not in a game right now.'
-        elif(game.channel is not ctx.message.channel):
+        elif game.channel is not ctx.message.channel:
             message = (f'{author.mention}, games must be played in the same '
                        f'channels that they started in.  Try again in the '
                        f'#{game.channel} channel.')
-        elif(game.turn.id is not author.id):
+        elif game.turn.id is not author.id:
             message = f'{author.mention}, it is not your turn.'
         else:
             roll = game.roll()
@@ -167,12 +170,13 @@ class DeathrollCommands(commands.Cog):
         max_afk_time = 180.0  # seconds
         author = ctx.message.author
         game = self.deathroll_game_with(author)
-        if(game is None):
+
+        if game is None:
             message = f'{author.mention} you are not in a game right now.'
-        elif(game.get_opponent(author) is not opponent):
+        elif game.get_opponent(author) is not opponent:
             message = (f'{author.mention} you are not in a game with '
                        f'{opponent.display_name} right now.')
-        elif(game.t_since_roll(opponent) > max_afk_time):
+        elif game.t_since_roll(opponent) > max_afk_time:
             message = (f'{opponent.mention} has not been active in over three '
                        'minutes, they have automically surrendered the game')
             self.deathroll_win(winner=author, loser=opponent, game=game)
@@ -239,7 +243,7 @@ class DeathrollCommands(commands.Cog):
 
         try:
             for invite in deathroll_invites[player2.id]:
-                if(invite.player.id is player1.id):
+                if invite.player.id is player1.id:
                     return invite
         except(KeyError):
             return None  # don't think it's necessary to throw an error here
@@ -255,5 +259,5 @@ class DeathrollCommands(commands.Cog):
         global deathroll_invites
 
         deathroll_invites[player.id].remove(invite)
-        if(len(deathroll_invites[player.id]) == 0):
+        if len(deathroll_invites[player.id]) == 0:
             del deathroll_invites[player.id]
