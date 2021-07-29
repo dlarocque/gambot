@@ -6,7 +6,7 @@ The points that members earn through their interactions with others can then be 
 In the future, I plan on adding a shop where users can spend their points on roles, as well as leaderboards where users can flex their virtual currencies to their friends. 
 
 # Commands
-For a full list of commands see the [command documentation](https://github.com/dlarocque/gambot/docs/COMMANDS.md)
+For a full list of commands see the [command documentation](https://github.com/dlarocque/gambot/blob/master/docs/COMMANDS.md)
 
 ## Want To Use This Bot?
 If, for some reason you are interested in adding this bot to your server, see setup.txt for a quick guide on how to run this bot wherever you want.
